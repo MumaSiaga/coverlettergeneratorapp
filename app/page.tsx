@@ -4,10 +4,47 @@ import Image from "next/image";
 import Link from "next/link";
 import { Inter } from "next/font/google";
 import { useState } from "react";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
+import { useRef } from "react";
+
+
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+const previewRef = useRef<HTMLDivElement>(null);
+const handleDownloadPDF = async () => {
+  if (!previewRef.current) return;
+
+  // Make hidden div visible temporarily for capture
+  previewRef.current.style.display = "block";
+
+  const canvas = await html2canvas(previewRef.current, { scale: 2 });
+  const imgData = canvas.toDataURL("image/png");
+
+  const pdf = new jsPDF("p", "pt", "a4");
+  const pdfWidth = 595;
+  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+  let remainingHeight = pdfHeight;
+  let position = 0;
+  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+  while (remainingHeight > 842) {
+    position -= 842;
+    pdf.addPage();
+    pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+    remainingHeight -= 842;
+  }
+
+  pdf.save("cover_letter.pdf");
+
+  // Hide the div again
+  previewRef.current.style.display = "none";
+};
+
+
   const handleSubmit = async () => {
   if (!cvFile) {
     alert("Please upload your CV");
@@ -249,7 +286,10 @@ export default function Home() {
       Preview
     </h3>
     <div className="flex items-center gap-2">
-      <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/20">
+      <button 
+      type="button"
+      onClick={handleDownloadPDF}
+      className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/20">
         <span className="material-symbols-outlined text-[18px]">download</span>
         Download PDF
       </button>
@@ -261,7 +301,7 @@ export default function Home() {
     
     <div className="h-1.5 w-full bg-gradient-to-r from-blue-600/80 to-blue-400"></div>
 
-    <div className="absolute inset-0 z-10 bg-white flex flex-col items-start justify-start p-8 text-left overflow-auto">
+    <div className="absolute inset-0 z-10 bg-white flex flex-col items-start justify-start p-8 text-left overflow-auto text-black">
   {loading ? (
     <p className="text-gray-500">Generating cover letter...</p>
   ) : generatedLetter ? (
@@ -293,7 +333,9 @@ export default function Home() {
       </p>
       
     </div>
+ 
   </div>
+
 
 </section>
 
@@ -301,6 +343,23 @@ export default function Home() {
         
        </section>
       </section>
+<div
+  ref={previewRef}
+  className="hidden bg-white"
+  style={{
+    width: "595px",
+    padding: "40px",
+    fontFamily: "serif",
+    fontSize: "9pt",
+    color: "#000000",
+    lineHeight: 1.5,
+  }}
+>
+  {generatedLetter && generatedLetter.split("\n").map((line, i) => (
+    <p key={i} style={{ margin: "0 0 8px 0" }}>{line}</p>
+  ))}
+</div>
+
 
     </main>
     </div>
