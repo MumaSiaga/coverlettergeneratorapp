@@ -90,8 +90,8 @@ const handleDownloadPDF = async () => {
   const [cvFile, setCvFile] = useState<File | null>(null);
   return (
     <div className="bg-gray-100 min-h-screen">
-    <header className="w-full border-b bg-white">
-      <nav className=" flex items-center justify-between px-2 py-4 ml-4">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur border-b">
+      <nav className="flex items-center justify-between px-4 py-4">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-[24px] text-blue-600">description</span>
           <span className="font-semibold text-lg text-black">
@@ -105,7 +105,7 @@ const handleDownloadPDF = async () => {
 
     </header>
 
-    <main>
+    <main className="pt-20">
       <h1 className={`text-black font-bold text-4xl ${inter.className} ml-4 mt-8`}>Create your Cover letter</h1>
       <p className={`text-black text-l ${inter.className} ml-4 mt-6`}>Upload your Cv and paste the job description to generate a tailored letter in seconds</p>
       <section className="flex flex-col lg:flex-row gap-8">
